@@ -1,14 +1,14 @@
 from neo4j import GraphDatabase
 
 
-def main():
+def main(user,password):
     uri = "bolt://localhost:7687"
-    driver = GraphDatabase.driver(uri, auth=("neo4j", "ceosdb_scraper"))
+    driver = GraphDatabase.driver(uri, auth=(user,password))
 
     with driver.session() as session:
         # Remove all nodes with SensorType as label
         results = session.run('MATCH (st:SensorType) DETACH DELETE st')
-        print(results.consume().counters)
+        #print(results.consume().counters)
         # Get list of sensor types
         results = session.run('MATCH (s:Sensor) RETURN DISTINCT s.types, count(*)')
         sensor_types_dict = {}
@@ -70,8 +70,6 @@ def main():
                 # For each triplet (type, band, observable) count the number of sensors
 
                 if(sensor_type_count > 4 and sensor_type is not None and sensor_band is not None):
-                    print(sensor_band)
-                    print(sensor_type)
                     result = session.run('CREATE (st:SensorType {name: $rule_name, type: $type, waveband: $band}) ',
                                         rule_name=sensor_band + " " + sensor_type,
                                         type=sensor_type,
@@ -107,4 +105,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main("neo4j","ceosdb_scraper")

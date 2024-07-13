@@ -3,9 +3,9 @@ import time
 from neo4j import GraphDatabase
 
 # Get Neo4j server details from environment variables
-uri = "bolt://localhost:7687"
-user = "neo4j"
-password = "ceosdb_scraper"
+# uri = "bolt://localhost:7687"
+# user = "neo4j"
+# password = "ceosdb_scraper"
 def test_neo4j_connection(uri, user, password):
     worked = False
     driver = GraphDatabase.driver(uri, auth=(user, password))

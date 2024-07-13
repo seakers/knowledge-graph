@@ -3,9 +3,9 @@ import csv
 from neo4j import GraphDatabase
 
 
-def main(flag):
+def main(user,password,flag):
     uri = "bolt://localhost:7687"
-    driver = GraphDatabase.driver(uri, auth=("neo4j", "ceosdb_scraper"))
+    driver = GraphDatabase.driver(uri, auth=(user,password))
 
     with open('kg_'+flag+'.csv', 'w', newline='') as csvfile:
         fieldnames = ['head', 'head_id', 'relation', 'relation_id', 'tail', 'tail_id']
@@ -32,4 +32,4 @@ def main(flag):
 
 
 if __name__ == "__main__":
-    main("plain")
+    main("neo4j","ceosdb_scraper","plain")

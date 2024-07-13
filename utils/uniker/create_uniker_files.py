@@ -5,32 +5,37 @@ import random
 from neo4j import GraphDatabase
 
 
-def main():
+def main(user,password):
     uri = "bolt://localhost:7687"
-    driver = GraphDatabase.driver(uri, auth=("neo4j", "ceosdb_scraper"))
+    driver = GraphDatabase.driver(uri, auth=(user,password))
     kg = []
-    entities = []
+    entity_pairs = []
+    entity_ids = []
     relations = []
     with driver.session() as session:
         results = session.run("MATCH (a)-[r]->(b) RETURN a, r, b")
         for result in results:
             a = result["a"].get('name')
+            a_id = result["a"].element_id
             r = result["r"].type
             b = result["b"].get('name')
-            entities.append(a)
-            entities.append(b)
+            b_id = result["b"].element_id
+            entity_pairs.append((a_id,a))
+            entity_pairs.append((b_id,b))
+            entity_ids.append(a_id)
+            entity_ids.append(b_id)
             relations.append(r)
-            kg.append((a,r,b))
-    print("done querying")
-    entities = set(entities)
-    entities = list(entities)
+            kg.append((a_id,r,b_id))
+    entity_pairs = set(entity_pairs)
+    entity_pairs = list(entity_pairs)
+
+    entity_ids = set(entity_ids)
+    entity_ids = list(entity_ids)
 
     relations = set(relations)
     relations = list(relations)
 
-    kg_w_indices = []
-    for entry in kg:
-        kg_w_indices.append((entities.index(entry[0]),entry[1],entities.index(entry[2])))
+    kg_w_indices = kg
 
     random.shuffle(kg_w_indices)
 
@@ -45,13 +50,13 @@ def main():
     for i, relation in enumerate(relations):
         file1.write(str(i)+"\t"+str(relation)+"\n")
     file1.close()
-    file2 = open("./UniKER/data/3dchess/entity_names.dict","w")
-    for i, entity in enumerate(entities):
-        file2.write(str(i)+"\t"+str(entity)+"\n")
+    file2 = open("./UniKER/data/3dchess/entity_pairs.dict","w")
+    for i, entity_pair in enumerate(entity_pairs):
+        file2.write(str(entity_pair[0])+"\t"+str(entity_pair[1])+"\n")
     file2.close()
     file3 = open("./UniKER/data/3dchess/entities.dict","w")
-    for i, entity in enumerate(entities):
-        file3.write(str(i)+"\t"+str(entities.index(entity))+"\n")
+    for i, entity_id in enumerate(entity_ids):
+        file3.write(str(i)+"\t"+str(entity_id)+"\n")
     file3.close()
     file4 = open("./UniKER/data/3dchess/train.txt","w")
     for i, fact in enumerate(kg_w_indices[0:int(len(kg_w_indices)*train_percentage)]):
@@ -74,4 +79,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main("neo4j","ceosdb_scraper")

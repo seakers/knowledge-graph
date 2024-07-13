@@ -1,7 +1,7 @@
 import csv
 from neo4j import GraphDatabase
 
-def main(flag):
+def main(user,password,flag):
     heads = []
     head_ids = []
     relations = []
@@ -25,7 +25,7 @@ def main(flag):
             tail_ids.append(row[5])
 
     uri = "bolt://localhost:7687"
-    driver = GraphDatabase.driver(uri, auth=("neo4j", "ceosdb_scraper"))
+    driver = GraphDatabase.driver(uri, auth=(user,password))
 
     with driver.session() as session:
         result = session.run('MATCH ()-[r]->() DELETE r;')
@@ -38,6 +38,7 @@ def main(flag):
             tail_id = int(tail_ids[i])
             relation = relations[i]
             tail = tails[i]
+            print(relation)
             ### THIS IS STUPID BUT CYPHER DOESN'T ACCEPT RELATIONSHIP TYPES AS PARAMETERS ###
             if relation == "TYPE_OF":
                 result = session.run('MATCH (h:ObservableProperty),(t:ObservablePropertyCategory) '
@@ -124,4 +125,4 @@ def main(flag):
 # " python run.py 3dchess 0 3dchess_model TransE 5 0.0 0.2 "
 
 if __name__ == "__main__":
-    main("plain")
+    main("neo4j","ceosdb_scraper","plain")
